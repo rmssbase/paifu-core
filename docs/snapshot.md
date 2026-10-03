@@ -14,7 +14,7 @@ Snapshot 不是完整牌谱事件，也不是 OCR 证据格式。它只表示牌
     "latest_action": {
         "type": "draw",
         "player": "E",
-        "card": "5m"
+        "tile": "5m"
     },
     "metainfo": {
         "wind": "E",
@@ -185,8 +185,8 @@ added_kan
 
 | 值 | 必填字段 | 含义 |
 | --- | --- | --- |
-| `draw` | `player`, `card` | 玩家普通摸牌后进入自身决策。 |
-| `replacement` | `player`, `card` | 玩家岭上补牌后进入自身决策。 |
+| `draw` | `player`, `tile` | 玩家普通摸牌后进入自身决策。 |
+| `replacement` | `player`, `tile` | 玩家岭上补牌后进入自身决策。 |
 | `chi` | `player` | 玩家吃牌后进入切牌决策。 |
 | `pon` | `player` | 玩家碰牌后进入切牌决策。 |
 
@@ -198,9 +198,9 @@ added_kan
 
 | 值 | 必填字段 | 含义 |
 | --- | --- | --- |
-| `discard` | `player`, `card` | 玩家刚打出一张牌，其他玩家需要判断是否 `chi`、`pon`、`kan` 或 `ron`。 |
-| `riichi_declaration` | `player`, `card` | 玩家刚打出立直宣言牌，其他玩家需要判断是否 `chi`、`pon`、`kan` 或 `ron`；若该牌被荣和，立直不成立。 |
-| `added_kan` | `player`, `card` | 玩家刚加杠，其他玩家需要判断是否抢杠 `ron`。 |
+| `discard` | `player`, `tile` | 玩家刚打出一张牌，其他玩家需要判断是否 `chi`、`pon`、`kan` 或 `ron`。 |
+| `riichi_declaration` | `player`, `tile` | 玩家刚打出立直宣言牌，其他玩家需要判断是否 `chi`、`pon`、`kan` 或 `ron`；若该牌被荣和，立直不成立。 |
+| `added_kan` | `player`, `tile` | 玩家刚加杠，其他玩家需要判断是否抢杠 `ron`。 |
 
 立直宣言牌后示例：
 
@@ -210,7 +210,7 @@ added_kan
     "latest_action": {
         "type": "riichi_declaration",
         "player": "S",
-        "card": "7p"
+        "tile": "7p"
     },
     "metainfo": {
         "wind": "E",
@@ -240,8 +240,8 @@ added_kan
 
 | 值 | 必填字段 | 含义 |
 | --- | --- | --- |
-| `tsumo` | `player`, `card`, `yaku` | 自摸结束。 |
-| `ron` | `player`, `card`, `yaku` | 荣和结束；`player` 可为单个玩家或玩家列表。 |
+| `tsumo` | `player`, `tile`, `yaku` | 自摸结束。 |
+| `ron` | `player`, `tile`, `yaku` | 荣和结束；`player` 可为单个玩家或玩家列表。 |
 | `draw_game` | `draw_game_type` | 流局结束；不带 `player`。 |
 
 多人荣和示例：
@@ -252,7 +252,7 @@ added_kan
     "latest_action": {
         "type": "ron",
         "player": ["S", "W"],
-        "card": "5p",
+        "tile": "5p",
         "yaku": [
             ["one_shot"],
             []
@@ -276,7 +276,7 @@ N
 
 除 `ron` 外，`player` 都是单个玩家。`ron` 可以是单个玩家，也可以是玩家列表，用于一炮多响。`draw_game` 不带 `player`。
 
-### `card`
+### `tile`
 
 牌使用紧凑牌 ID，允许值为：
 
@@ -287,7 +287,7 @@ N
 1z..7z
 ```
 
-以下动作必须带 `card`：
+以下动作必须带 `tile`：
 
 ```text
 draw
@@ -299,7 +299,7 @@ tsumo
 ron
 ```
 
-`chi` 和 `pon` 不带 `card`，因为它们接收的是前一个 `call_decision` 中的弃牌。`draw_game` 不带 `card`。
+`chi` 和 `pon` 不带 `tile`，因为它们接收的是前一个 `call_decision` 中的弃牌。`draw_game` 不带 `tile`。
 
 ### `yaku`
 
