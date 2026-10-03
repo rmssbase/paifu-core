@@ -170,7 +170,7 @@ Snapshot 不是完整牌谱事件，也不是 OCR 证据格式。它只表示牌
     "type": "tsumo",
     "player": "E",
     "card": "7p",
-    "yaku": ["ippatsu"]
+    "yaku": ["one_shot"]
   }
 }
 ```
@@ -199,7 +199,7 @@ Snapshot 不是完整牌谱事件，也不是 OCR 证据格式。它只表示牌
     "player": ["S", "W"],
     "card": "5p",
     "yaku": [
-      ["ippatsu"],
+      ["one_shot"],
       []
     ]
   }
@@ -277,7 +277,7 @@ ron
 单人自摸或单人荣和时，`yaku` 是字符串列表：
 
 ```json
-["ippatsu", "double_riichi"]
+["one_shot", "double_riichi"]
 ```
 
 多人荣和时，`yaku` 是列表的列表，并与 `player` 列表按顺序一一对应：
@@ -286,7 +286,7 @@ ron
 {
   "player": ["S", "W"],
   "yaku": [
-    ["ippatsu"],
+    ["one_shot"],
     ["double_riichi"]
   ]
 }
@@ -296,9 +296,9 @@ ron
 
 ```text
 double_riichi
-ippatsu
-rinshan
-chankan
+one_shot
+after_a_kan
+robbing_a_kan
 ```
 
 普通手役、立直状态以及可由局面推断的海底/河底等役，不写入 `latest_action.yaku`。
@@ -376,7 +376,7 @@ nine_terminals
       "type": "ron",
       "player": "S",
       "card": "3p",
-      "yaku": ["chankan"]
+      "yaku": ["robbing_a_kan"]
     }
   }
 ]
