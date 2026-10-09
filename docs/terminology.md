@@ -163,7 +163,7 @@
 | `green_dragon` | 发 | 发刻子或杠子。 |
 | `red_dragon` | 中 | 中刻子或杠子。 |
 | `after_a_kan` | 岭上开花 | 杠后补牌自摸。 |
-| `robbing_a_kan` | 抢杠 | 抢加杠荣和。 |
+| `robbing_a_kan` | 抢杠 | 抢加杠荣和；规则允许时也包括用国士无双抢暗杠。 |
 | `last_tile_draw` | 海底摸月 | 牌山最后一张自摸。 |
 | `last_discard` | 河底捞鱼 | 牌山摸尽前最后打牌荣和。 |
 
