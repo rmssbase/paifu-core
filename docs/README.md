@@ -1,20 +1,20 @@
 # Docs
 
-paifu-core 的格式文档分为通用术语、局面格式、压缩牌谱格式和来源映射。下面是各文档的定位。
+paifu-core 的文档分为通用术语、Snapshot 局面格式、Paifu 压缩牌谱格式，以及与具体游戏规则相关的 game protocol。
 
 | 文档 | 内容 | 适用场景 |
 | --- | --- | --- |
-| [terminology.md](terminology.md) | 通用日麻术语、牌 ID、动作名、役种名和顺序无关牌列表的排序规则。 | 阅读其它格式前先统一命名。 |
-| [snapshot.md](snapshot.md) | 标准局面 snapshot 格式，表示牌局边界或一个明确决策入口。 | 表达 replay 到某个决策点后的局面。 |
-| [simplified_paifu.md](simplified_paifu.md) | 压缩牌谱 simplified paifu 格式，只保存起局事实、牌序和决策结果。 | 大规模保存、重放和统计牌谱。 |
-| [majsoul_simplified_paifu.md](majsoul_simplified_paifu.md) | 雀魂牌谱链接、解码记录和 `majsoul_std` simplified paifu 的字段映射。 | 将雀魂来源转换成 simplified paifu。 |
+| [terminology.md](terminology.md) | 日麻术语的仓库内名称：牌 ID、风位、动作名、役种名、流局类型和牌列表排序规则。 | 统一命名。 |
+| [snapshot.md](snapshot.md) | Snapshot 格式，表示小局的开始、结束或一个明确的决策点。 | 描述某一时刻的完整局面。 |
+| [paifu.md](paifu.md) | Paifu 格式，只保存起局场况、牌序和每个决策点的选择，由重放还原出 Snapshot 序列。 | 大规模保存、重放和统计牌谱。 |
+| [game_protocol/majsoul_std.md](game_protocol/majsoul_std.md) | 雀魂四人标准规则 `majsoul_std` 的含义，以及雀魂牌谱到 Paifu 的转换规则。 | 将雀魂牌谱转换成 Paifu。 |
 
 关系概览：
 
 ```text
-Mahjong Soul paipu link
-  -> decoded Mahjong Soul game record
-  -> majsoul_std simplified paifu
-  -> replay decision points
-  -> snapshot
+雀魂牌谱链接
+  -> 解码后的雀魂记录
+  -> Paifu (rule = majsoul_std)
+  -> 重放得到各个决策点
+  -> Snapshot
 ```
