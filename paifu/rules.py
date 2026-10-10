@@ -1,9 +1,14 @@
 from dataclasses import dataclass
 
+from .common import fail
+
 
 @dataclass(frozen=True)
 class RuleSet:
-    """Four-player ranked hanchan rules. Flags only cover what differs between supported rule sets."""
+    """Four-player ranked hanchan rules shared by every platform.
+
+    Defaults describe the common rules; platform subpackages (paifu.majsoul, paifu.tenhou) set the flags that differ.
+    """
 
     name: str
     start_score: int = 25000
@@ -33,14 +38,16 @@ class RuleSet:
         return self.start_score * 4
 
 
-RULES = {
-    "majsoul_std": RuleSet("majsoul_std"),
-    "tenhou_std": RuleSet(
-        "tenhou_std",
-        triple_ron_draw=True,
-        double_yakuman=False,
-        pao_covers_composite=True,
-        kokushi_robs_closed_kan=False,
-        reveal_pending_dora_on_kan=False,
-    ),
-}
+def rule_sets():
+    """All supported rule sets by name."""
+    from .majsoul.rules import MAJSOUL_STD
+    from .tenhou.rules import TENHOU_STD
+
+    return {rules.name: rules for rules in (MAJSOUL_STD, TENHOU_STD)}
+
+
+def get_rules(name):
+    rules = rule_sets().get(name) if isinstance(name, str) else None
+    if rules is None:
+        fail(f"Paifu.rule is not supported: {name!r}")
+    return rules

@@ -47,6 +47,8 @@ https://game.maj-soul.com/1/?paipu=261001-7c1f7669-7c88-428f-be52-594120ef58d7_a
 
 ### 解码记录
 
+通过牌谱接口取得的记录是一个 JSON 对象：`head` 是对局元信息，`data` 是 Base64 编码的 protobuf `.lq.Wrapper`，内层为 `.lq.GameDetailRecords`。较早的牌谱把每条记录放在 `GameDetailRecords.records`（每项是一个 `.lq.Wrapper`）；较新的牌谱放在 `GameDetailRecords.actions`，其中 `type = 1` 的项的 `result` 是一个 `.lq.Wrapper`。两种形式按出现顺序合并即可。
+
 解码后的雀魂记录包含 `uuid`、`head` 和 `actions`。`head` 是整场对局的元信息（玩家、规则、开始时间等），`actions` 是按时间顺序排列的记录列表。每条记录有一个类型名和对应的数据：
 
 | 雀魂记录 | 含义 | 转换时用到的字段 |
@@ -135,7 +137,7 @@ dealer_seat           -> E
 
 ### 由 paishan 拆分牌序
 
-`RecordNewRound.paishan` 是整副 136 张牌的排列，以牌 ID 首尾相接的字符串表示。按下标拆分为：
+`RecordNewRound.paishan` 是牌山的排列，以牌 ID 首尾相接的字符串表示。它有两种长度：较新的牌谱是整副 136 张，较早的牌谱只有配牌之后剩下的 83 张（69 张普通牌山加 14 张王牌），即省略了下表中 `0:53` 的部分。两种长度的末尾 83 张含义相同，因此统一取最后 83 张拆分。以 136 张为例，下标含义为：
 
 | 下标范围 | Paifu 字段 | 含义 |
 | --- | --- | --- |
@@ -144,7 +146,7 @@ dealer_seat           -> E
 | `53:122` | `wall` | 69 张普通摸牌序列，`wall[0]` 即 `paishan[53]`。 |
 | `122:136` | 王牌 | 14 张，用于生成 `rinshan`、`dora_indicators`、`ura_indicators`。 |
 
-把王牌记为 `dead_wall = paishan[122:136]`，映射为：
+起手牌直接取 `tiles0`–`tiles3`，不依赖 `paishan` 的前半段。把王牌记为 `dead_wall = paishan[-14:]`，映射为：
 
 ```text
 rinshan         = [dead_wall[13], dead_wall[12], dead_wall[11], dead_wall[10]]
@@ -226,7 +228,7 @@ tile   = 唯一一张 from_seat != seat 的牌
 player = seat 映射得到的风位
 ```
 
-`type` 按副露形状确定：顺子为 `chi`，三张相同为 `pon`，四张相同为 `open_kan`。
+`type` 按副露形状确定：顺子为 `chi`，三张相同为 `pon`，四张相同为 `open_kan`。雀魂的 `RecordChiPengGang.type`（`0` 吃、`1` 碰、`2` 大明杠）应与形状一致，可用于校验。
 
 ```json
 {
@@ -254,7 +256,7 @@ player = seat 映射得到的风位
 
 ### closed_kan / added_kan
 
-`RecordAnGangAddGang.type = 2` 表示暗杠，写为 `closed_kan`；其它值表示加杠，写为 `added_kan`。雀魂的 `tiles` 只给出杠的牌种，Paifu 的 `hands` 需要结合重放中的当前手牌确定具体用到的牌（包括是否含红五）：
+`RecordAnGangAddGang.type = 3` 表示暗杠，写为 `closed_kan`；`type = 2` 表示加杠，写为 `added_kan`。雀魂的 `tiles` 只给出杠的牌种，Paifu 的 `hands` 需要结合重放中的当前手牌确定具体用到的牌（包括是否含红五）：
 
 - `closed_kan`：`hands` 是从手牌中拿出的四张牌。
 - `added_kan`：`hands` 是从手牌中加到已有碰上的那一张牌。
@@ -277,7 +279,7 @@ player = seat 映射得到的风位
 {"type": "pass"}
 ```
 
-雀魂 `RecordDiscardTile.operations` 列出了这张弃牌给其他玩家的可选操作，可以用来校验：`operations` 非空时重放应生成 `call_decision`，为空时不应生成，也不写 `pass`。
+雀魂 `RecordDiscardTile.operations` 和 `RecordAnGangAddGang.operations` 列出了其他玩家的可选操作，可以用来校验：`operations` 非空时重放应生成 `call_decision`，为空时不应生成，也不写 `pass`。逐家比较时，操作类型 `2`、`3`、`5`、`9` 分别对应 `chi`、`pon`、`open_kan`、`ron`。
 
 ### tsumo / ron
 
@@ -303,7 +305,37 @@ player = seat 映射得到的风位
 {"type": "draw"}
 ```
 
-九种九牌对应玩家在决策点的主动宣告；其它流局是重放自动触发的，Paifu 仍以这条 `draw` 结尾。流局类型、听牌玩家和点数变化由重放推导，雀魂记录中的对应字段可用于校验。
+九种九牌对应玩家在决策点的主动宣告；其它流局是重放自动触发的，Paifu 仍以这条 `draw` 结尾。流局类型、听牌玩家和点数变化由重放推导，雀魂记录中的对应字段可用于校验。`RecordLiuJu.type` 的取值：`1` 九种九牌、`2` 四风连打、`3` 四杠散了、`4` 四家立直、`5` 三家和了（`majsoul_std` 中不会出现）。
+
+### 用于校验的其它字段
+
+| 雀魂字段 | 含义 |
+| --- | --- |
+| `RecordDealTile.doras`、`RecordDiscardTile.doras` | 宝牌指示牌发生变化时，给出当前已翻开的全部宝牌指示牌。 |
+| `RecordHule.delta_scores`、`RecordNoTile.scores[].delta_scores` | 按座位排列的点数变化，包含本场和场供；立直棒在立直成立时已经扣除。 |
+| `RecordDealTile.zhenting` | 按座位排列，摸牌时各家是否振听。 |
+| `RecordDiscardTile.zhenting` | 按座位排列，除振听外，这张弃牌是某家的听牌（不荣和就会振听）时也为真。 |
+| `RecordHule.hules[].fans` | 役种 ID 与番数；`31`、`32`、`33` 分别为宝牌、红宝牌、里宝牌。 |
+
+## Python 工具
+
+`paifu.majsoul` 实现了本页的转换规则，转换时同步重放并用上述字段校验，任何不一致都会抛出 `PaifuError`：
+
+```python
+import paifu.majsoul
+from paifu import write_json
+
+paifu_obj = paifu.majsoul.convert("record.json")  # 牌谱接口取得的 JSON，也可以传入 dict 或已解码的记录
+write_json("record.paifu.json", paifu_obj)
+```
+
+批量转换一个目录（输出文件与输入同名）：
+
+```text
+python -m paifu.majsoul RAW_DIR PAIFU_DIR
+```
+
+`paifu.majsoul.decode_game_record` 只做 protobuf 解码，`paifu.majsoul.parse_paipu_link` 解析牌谱链接。
 
 ## 完整示例
 

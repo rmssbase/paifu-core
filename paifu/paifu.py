@@ -20,7 +20,7 @@ from .common import (
     tile_kind,
 )
 from .round_replay import RoundReplay
-from .rules import RULES
+from .rules import get_rules
 
 PAIFU_ORDER = ("rule", "rounds")
 ROUND_ORDER = ("metainfo", "tiles", "decisions")
@@ -58,8 +58,7 @@ class Paifu:
         obj = load_json_input(data)
         expect_keys(obj, "Paifu", PAIFU_ORDER)
         rule = obj["rule"]
-        check(rule in RULES, f"Paifu.rule is not supported: {rule!r}")
-        rules = RULES[rule]
+        rules = get_rules(rule)
         expect_list(obj["rounds"], "Paifu.rounds")
         check(obj["rounds"], "Paifu.rounds must not be empty")
         rounds = [_validate_round(raw, f"Paifu.rounds[{i}]", rules) for i, raw in enumerate(obj["rounds"])]
