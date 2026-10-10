@@ -50,10 +50,16 @@ class WinResult:
     aka: int
     ura: int
     base: int
+    nominal_yakuman: int = 0
 
     @property
     def yakuman_multiplier(self):
         return sum(multiplier for _, multiplier in self.yakuman)
+
+    @property
+    def rank(self):
+        """High-point order; equal points prefer the yakuman that would count double, even when the rules do not."""
+        return (self.base, self.nominal_yakuman, self.han, self.fu)
 
 
 def ceil100(value):
@@ -106,7 +112,7 @@ def evaluate_win(ctx, rules):
     candidates = [c for c in candidates if c is not None]
     if not candidates:
         return None
-    return max(candidates, key=lambda r: (r.base, r.han, r.fu))
+    return max(candidates, key=lambda r: r.rank)
 
 
 def _meld_group(meld):
@@ -161,10 +167,11 @@ def _dora_counts(ctx, all_tiles):
 
 def _finish(ctx, rules, yaku, yakuman, fu, all_tiles):
     if yakuman:
+        nominal = sum(m for _, m in yakuman)
         if not rules.double_yakuman:
             yakuman = [(name, 1) for name, _ in yakuman]
         multiplier = sum(m for _, m in yakuman)
-        return WinResult([], yakuman, 0, fu, 0, 0, 0, 8000 * multiplier)
+        return WinResult([], yakuman, 0, fu, 0, 0, 0, 8000 * multiplier, nominal)
     han = sum(h for _, h in yaku)
     if han == 0:
         return None

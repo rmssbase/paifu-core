@@ -397,7 +397,7 @@ class RoundReplay:
         best = None
         for win_tile in candidates:
             result = self._evaluate(player, list(hand), win_tile, True, **flags)
-            if result is not None and (best is None or (result.base, result.han, result.fu) > (best[0].base, best[0].han, best[0].fu)):
+            if result is not None and (best is None or result.rank > best[0].rank):
                 best = (result, win_tile)
         if best is None:
             self._fail(f"{WINDS[player]} cannot win by tsumo with this hand")

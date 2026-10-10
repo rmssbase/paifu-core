@@ -338,7 +338,7 @@ sum(scores.values()) + kyotaku * 1000 == 100000
 
 | `latest_action.type` | 必填字段 | 含义 |
 | --- | --- | --- |
-| `tsumo` | `player`, `tile`, `yaku` | 自摸结束。`tile` 是和牌牌。 |
+| `tsumo` | `player`, `tile`, `yaku` | 自摸结束。`tile` 是和牌牌；天和时是重放按高点法选出的牌，见 [paifu.md](paifu.md#tsumo)。 |
 | `ron` | `players`, `tile`, `yaku` | 荣和结束。`tile` 是和牌牌；`players` 是荣和者列表，单人荣和时也写成列表。 |
 | `draw` | `draw_type` | 流局结束，不带 `player` 和 `tile`。荒牌流局时还需带 `ready_players`。 |
 
